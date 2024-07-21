@@ -4,7 +4,7 @@ import { User } from "../models/userModel.js";
 export const registerUser = async (req, res) => {
     try {
 
-        const { name, email, password } = req.body;
+        const { name, email, password, userAgent, ip } = req.body;
 
         let user = await User.findOne({ email });
         if(user){
@@ -18,7 +18,8 @@ export const registerUser = async (req, res) => {
             name,
             email,
             password,
-            ipAdd: req.userIp
+            ipAdd: ip,
+            userAgent,
         });
 
         res.status(201).json({ 
@@ -38,7 +39,7 @@ export const registerUser = async (req, res) => {
 export const loginUser = async (req, res) => {
     try {
 
-        const { email, password } = req.body;
+        const { email, password, userAgent, ip } = req.body;
 
         if(!email || !password){
             return res.status(400).json({
