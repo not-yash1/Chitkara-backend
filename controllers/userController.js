@@ -5,6 +5,7 @@ export const registerUser = async (req, res) => {
     try {
 
         const { name, email, password, userAgent, ip } = req.body;
+        console.log("Agent: ", userAgent, "IP: ", ip);
 
         let user = await User.findOne({ email });
         if(user){
@@ -64,7 +65,7 @@ export const loginUser = async (req, res) => {
             })
         }
 
-        if(user.ipAdd !== req.userIp){
+        if(user.ipAdd !== ip || user.userAgent !== userAgent){
             return res.status(401).json({
                 success: false,
                 message: "Device changed"
@@ -87,6 +88,48 @@ export const loginUser = async (req, res) => {
             message: "Logged in successfully",
         });
         
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: error.message
+        })
+    }
+}
+
+export const logoutUser = async (req, res) => {
+    try {
+        res.status(200).cookie("token", null, {
+            expires: new Date(Date.now()),
+            httpOnly: true,
+            sameSite: "none",
+            secure: true
+        }).json({
+            success: true,
+            message: "Logged out successfully"
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: error.message
+        })
+    }
+}
+
+export const myProfile = async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id);
+
+        if(!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            })
+        }
+        
+        res.status(200).json({
+            success: true,
+            user
+        })
     } catch (error) {
         res.status(500).json({
             success: false,
