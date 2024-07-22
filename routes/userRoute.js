@@ -1,6 +1,7 @@
 import express from "express";
 import captureIpAddress from "../middlewares/captureIP.js";
 import { loginUser, logoutUser, myProfile, registerUser } from "../controllers/userController.js";
+import { isAuthenticated } from "../middlewares/auth.js";
 
 export const userRoute = express.Router();
 
@@ -10,4 +11,4 @@ userRoute.route("/login").post(loginUser);
 
 userRoute.route("/logout").get(logoutUser);
 
-userRoute.route("/me").get(myProfile);
+userRoute.route("/me").get(isAuthenticated, myProfile);

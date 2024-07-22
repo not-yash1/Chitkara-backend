@@ -26,7 +26,8 @@ export const registerUser = async (req, res) => {
         res.status(201).json({ 
             success: true, 
             message: "User registered successfully", 
-            // data: user
+            token,
+            user,
         });
         
     } catch (error) {
@@ -86,6 +87,8 @@ export const loginUser = async (req, res) => {
         res.status(200).cookie("token", token, options).json({
             success: true,
             message: "Logged in successfully",
+            user,
+            token
         });
         
     } catch (error) {
@@ -117,20 +120,24 @@ export const logoutUser = async (req, res) => {
 
 export const myProfile = async (req, res) => {
     try {
+        console.log("Working1...")
         const user = await User.findById(req.user._id);
-
+        console.log("Working2...", user)
+        
         if(!user) {
             return res.status(404).json({
                 success: false,
                 message: "User not found"
             })
         }
+        console.log("Working3...")
         
         res.status(200).json({
             success: true,
             user
         })
     } catch (error) {
+        console.log(error.message)
         res.status(500).json({
             success: false,
             error: error.message
