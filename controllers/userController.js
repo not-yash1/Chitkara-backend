@@ -73,8 +73,6 @@ export const loginUser = async (req, res) => {
             })
         }
 
-        console.log("IP matched")
-
         const token = await user.generateToken();
 
         const options = {
