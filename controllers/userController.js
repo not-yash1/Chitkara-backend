@@ -5,7 +5,6 @@ export const registerUser = async (req, res) => {
     try {
 
         const { name, email, password, userAgent, ip } = req.body;
-        console.log("Agent: ", userAgent, "IP: ", ip);
 
         let user = await User.findOne({ email });
         if(user){
@@ -14,7 +13,6 @@ export const registerUser = async (req, res) => {
                 message: "User already exists" 
             });
         }
-        console.log("Working2...")
 
         user = await User.create({
             name,
@@ -23,15 +21,29 @@ export const registerUser = async (req, res) => {
             ipAdd: ip,
             userAgent,
         });
-        console.log("Working3...")
 
-        res.status(201).json({ 
-            success: true, 
-            message: "User registered successfully", 
-            token,
+        const token = await user.generateToken();
+
+        const options = {
+            expires: new Date(Date.now() + process.env.COOKIE_EXPIRE * 24 * 60 * 60 * 1000),
+            httpOnly: true,
+            sameSite: "none",
+            secure: true
+        }
+
+        res.status(201).cookie("token", token, options).json({
+            success: true,
+            message: "User registered successfully",
             user,
+            token
         });
-        console.log("Working4...")
+
+        // res.status(201).json({ 
+        //     success: true, 
+        //     message: "User registered successfully", 
+        //     token,
+        //     user,
+        // });
         
     } catch (error) {
         res.status(500).json({ 
@@ -69,7 +81,6 @@ export const loginUser = async (req, res) => {
             })
         }
 
-        console.log("IP: ", ip, "UserAgent: ", userAgent);
         if(user.ipAdd !== ip || user.userAgent !== userAgent){
             return res.status(401).json({
                 success: false,
