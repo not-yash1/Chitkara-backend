@@ -14,6 +14,7 @@ export const registerUser = async (req, res) => {
                 message: "User already exists" 
             });
         }
+        console.log("Working2...")
 
         user = await User.create({
             name,
@@ -22,6 +23,7 @@ export const registerUser = async (req, res) => {
             ipAdd: ip,
             userAgent,
         });
+        console.log("Working3...")
 
         res.status(201).json({ 
             success: true, 
@@ -29,6 +31,7 @@ export const registerUser = async (req, res) => {
             token,
             user,
         });
+        console.log("Working4...")
         
     } catch (error) {
         res.status(500).json({ 
@@ -66,6 +69,7 @@ export const loginUser = async (req, res) => {
             })
         }
 
+        console.log("IP: ", ip, "UserAgent: ", userAgent);
         if(user.ipAdd !== ip || user.userAgent !== userAgent){
             return res.status(401).json({
                 success: false,
@@ -118,9 +122,7 @@ export const logoutUser = async (req, res) => {
 
 export const myProfile = async (req, res) => {
     try {
-        console.log("Working1...")
         const user = await User.findById(req.user._id);
-        console.log("Working2...", user)
         
         if(!user) {
             return res.status(404).json({
@@ -128,14 +130,12 @@ export const myProfile = async (req, res) => {
                 message: "User not found"
             })
         }
-        console.log("Working3...")
         
         res.status(200).json({
             success: true,
             user
         })
     } catch (error) {
-        console.log(error.message)
         res.status(500).json({
             success: false,
             error: error.message
