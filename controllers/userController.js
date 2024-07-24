@@ -1,10 +1,12 @@
 import { User } from "../models/userModel.js";
+import haversine from "haversine-distance"
+// const { haversine } = pkg
 
 
 export const registerUser = async (req, res) => {
     try {
 
-        const { name, email, password, userAgent, ip } = req.body;
+        const { name, email, password, userAgent, ip, latitude, longitude } = req.body;
 
         let user = await User.findOne({ email });
         if(user){
@@ -20,7 +22,13 @@ export const registerUser = async (req, res) => {
             password,
             ipAdd: ip,
             userAgent,
+            location: {
+                latitude,
+                longitude
+            }
         });
+
+        await user.save();
 
         const token = await user.generateToken();
 
@@ -56,7 +64,8 @@ export const registerUser = async (req, res) => {
 export const loginUser = async (req, res) => {
     try {
 
-        const { email, password, userAgent, ip } = req.body;
+        const { email, password, userAgent, ip, latitude, longitude } = req.body;
+        console.log("Latitude: ", latitude, "Longitude: ", longitude);
 
         if(!email || !password){
             return res.status(400).json({
@@ -87,6 +96,22 @@ export const loginUser = async (req, res) => {
                 message: "Device changed"
             })
         }
+
+        const start = { latitude: user.location.latitude, longitude: user.location.longitude };
+        const end = { latitude, longitude };
+
+        console.log('Working...')
+        const distance = haversine(start, end);
+        console.log('After Working...')
+
+        if (distance > 5) {
+            return res.status(403).json({ 
+                success: false, 
+                message: 'Login location is not within the allowed radius' 
+            });
+        }
+
+        console.log("Location is within the allowed radius");
 
         const token = await user.generateToken();
 
